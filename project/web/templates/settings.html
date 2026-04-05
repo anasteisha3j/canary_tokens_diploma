@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}Налаштування{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <h1 class="page-title">⚙️ Налаштування системи</h1>
+
+    <div class="settings-grid">
+        <!-- Профіль користувача -->
+        <div class="card">
+            <div class="card-header">
+                <h2>👤 Профіль користувача</h2>
+            </div>
+            <div class="card-content">
+                <form method="POST" class="settings-form" id="profileForm">
+                    <div class="form-group">
+                        <label for="username">Ім'я користувача</label>
+                        <input type="text" id="username" value="{{ user.username }}" 
+                               class="form-control" readonly disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" value="{{ user.email }}" 
+                               class="form-control" readonly disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="organization">Організація *</label>
+                        <input type="text" id="organization" name="organization" 
+                               value="{{ user.organization.name if user.organization else '' }}" 
+                               class="form-control" placeholder="Назва компанії" required>
+                        <small class="form-text">Вкажіть назву вашої організації</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="role">Роль</label>
+                        <input type="text" id="role" value="{{ user.role }}" 
+                               class="form-control" readonly disabled>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Дата реєстрації</label>
+                        <input type="text" value="{{ user.created_at.strftime('%d.%m.%Y %H:%M') }}" 
+                               class="form-control" readonly disabled>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">💾 Зберегти профіль</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>🌍 Публічна адреса (URL-токени)</h2>
+            </div>
+            <div class="card-content">
+                <p class="form-text" style="margin-bottom: 0.75rem;">
+                    Змінна середовища <code>PUBLIC_BASE_URL</code> підставляється в нові URL-токени.
+                    Старі токени <strong>не оновлюються</strong> — після зміни адреси згенеруйте нові.
+                </p>
+                <div class="form-group">
+                    <label>Поточне значення на сервері (<code>PUBLIC_BASE_URL</code>)</label>
+                    <input type="text" class="form-control" readonly value="{{ public_base_url }}">
+                </div>
+                <div class="form-group">
+                    <label>Короткий шлях канареєвих посилань (<code>CANARY_LINK_PREFIX</code>)</label>
+                    <input type="text" class="form-control" readonly value="{{ canary_link_prefix }}">
+                    <small class="form-text">Приклад: <code>{{ public_base_url }}/{{ canary_link_prefix }}/Ab3xY9mK2nQpL5wR</code> — без UUID і без <code>/api/trigger/</code>. Не ставте <code>api</code>, <code>tokens</code>, <code>static</code> тощо.</small>
+                </div>
+                <p class="form-text" style="margin-bottom: 0.5rem;">
+                    Перевірка з іншої мережі або з мобільного інтернету (не Wi‑Fi ПК):
+                </p>
+                <ul class="form-text" style="margin-left: 1.25rem; line-height: 1.6;">
+                    <li>Відкрийте в браузері: <code>{{ public_base_url }}/api/ping</code> — очікується JSON <code>{"ok": true}</code>.</li>
+                    <li>Якщо не відкривається: ПК не доступний ззовні (CGNAT, немає port forwarding, фаєрвол), або використовується <code>http</code> на порту, який провайдер блокує — тоді потрібен тунель (ngrok, Cloudflare Tunnel) або VPS.</li>
+                    <li>З Wi‑Fi для LAN використовуйте <code>http://&lt;локальний IPv4 ПК&gt;:5000</code> у <code>PUBLIC_BASE_URL</code> і знову згенеруйте URL-токени.</li>
+                    <li>Якщо ping працює, а trigger ні: токен міг уже спрацювати — створіть новий або подивіться відповідь JSON (може бути <code>already_triggered</code>).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- НОВИЙ БЛОК: Налаштування розміщення для організації -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📤 Налаштування розміщення токенів</h2>
+            </div>
+            <div class="card-content">
+                <form id="deploySettings" class="settings-form">
+                    <h3>🌐 GitHub</h3>
+                    <div class="form-group">
+                        <label for="github_repo">Репозиторій GitHub</label>
+                        <input type="text" id="github_repo" name="github_repo" 
+                               value="{{ deploy_config.github_repo or '' }}"
+                               placeholder="owner/repo"
+                               class="form-control">
+                        <small class="form-text">Наприклад: privatbank/canary-tokens</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="github_branch">Гілка</label>
+                        <input type="text" id="github_branch" name="github_branch" 
+                               value="{{ deploy_config.github_branch or 'main' }}"
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="github_token">GitHub Token (опціонально)</label>
+                        <input type="password" id="github_token" name="github_token" 
+                               value=""
+                               placeholder="{% if deploy_config.github_token %}••• збережено — введіть новий щоб змінити{% else %}ghp_...{% endif %}"
+                               class="form-control"
+                               autocomplete="off">
+                        <small class="form-text">
+                            <a href="https://github.com/settings/tokens" target="_blank">
+                                Створити токен
+                            </a> (потрібні права: repo)
+                        </small>
+                    </div>
+
+                    <h3>📁 Локальне розміщення</h3>
+                    <div class="form-group">
+                        <label for="local_path">Шлях для збереження</label>
+                        <input type="text" id="local_path" name="local_path" 
+                               value="{{ deploy_config.local_path or 'tokens/' }}"
+                               placeholder="tokens/назва-організації/"
+                               class="form-control">
+                        <small class="form-text">Папка на сервері для збереження токенів</small>
+                    </div>
+
+                    <h3>📋 Pastebin</h3>
+                    <div class="form-group">
+                        <label for="pastebin_api">Pastebin API Key</label>
+                        <input type="password" id="pastebin_api" name="pastebin_api" 
+                               value="{{ deploy_config.pastebin_api or '' }}"
+                               placeholder="XXXXXXXXXXXXXXXXXXXXXXXX"
+                               class="form-control">
+                        <small class="form-text">
+                            <a href="https://pastebin.com/doc_api" target="_blank">Отримати API ключ</a>
+                        </small>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="saveDeploySettings()">
+                        💾 Зберегти налаштування розміщення
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Налаштування сповіщень -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🔔 Канали сповіщень</h2>
+            </div>
+            <div class="card-content">
+                <form id="notificationSettings" class="settings-form">
+                    <div class="form-group">
+                        <label for="telegram_bot">Telegram Bot Token</label>
+                        <input type="password" id="telegram_bot" name="telegram_bot"
+                               value="{{ user.telegram_bot or '' }}"
+                               placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz" 
+                               class="form-control">
+                        <small class="form-text">
+                            <a href="https://t.me/BotFather" target="_blank">@BotFather</a> 
+                            - створити бота
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telegram_chat">Telegram Chat ID</label>
+                        <input type="text" id="telegram_chat" name="telegram_chat"
+                               value="{{ user.telegram_chat or '' }}"
+                               placeholder="-1001234567890" 
+                               class="form-control">
+                        <small class="form-text">
+                            <a href="https://t.me/getidsbot" target="_blank">@getidsbot</a> 
+                            - отримати Chat ID
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="slack_webhook">Slack Webhook URL</label>
+                        <input type="url" id="slack_webhook" name="slack_webhook"
+                               value="{{ user.slack_webhook or '' }}"
+                               placeholder="https://hooks.slack.com/services/..." 
+                               class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="alert_email">Email для сповіщень</label>
+                        <input type="email" id="alert_email" name="alert_email"
+                               value="{{ user.alert_email or '' }}"
+                               placeholder="admin@company.com" 
+                               class="form-control">
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="saveNotificationSettings()">
+                        💾 Зберегти налаштування сповіщень
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Статистика використання -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📊 Статистика організації</h2>
+            </div>
+            <div class="card-content">
+                <div class="stats-list">
+                    <div class="stat-row">
+                        <span>Назва організації:</span>
+                        <strong>{{ user.organization.name if user.organization else 'Не вказано' }}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Токенів створено:</span>
+                        <strong>{{ user.tokens|length if user.tokens else 0 }}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Активацій:</span>
+                        <strong>{{ total_activations or 0 }}</strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>GitHub репозиторій:</span>
+                        <strong>
+                            {% if deploy_config.github_repo %}
+                                <a href="https://github.com/{{ deploy_config.github_repo }}" target="_blank">
+                                    {{ deploy_config.github_repo }}
+                                </a>
+                            {% else %}
+                                Не налаштовано
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div class="stat-row">
+                        <span>Остання активація:</span>
+                        <strong>
+                            {% if last_activation %}
+                                {{ last_activation.timestamp.strftime('%d.%m.%Y %H:%M') }}
+                            {% else %}
+                                Немає
+                            {% endif %}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Безпека -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🔐 Безпека</h2>
+            </div>
+            <div class="card-content">
+                <button class="btn btn-warning" onclick="changePassword()">
+                    🔑 Змінити пароль
+                </button>
+                <button class="btn btn-danger" onclick="logoutAll()">
+                    🚪 Вийти звідусіль
+                </button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    📥 Експорт даних
+                </button>
+            </div>
+        </div>
+
+        <!-- API ключ -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🔑 API доступ</h2>
+            </div>
+            <div class="card-content">
+                <div class="api-key-display">
+                    <code id="apiKey">ct_{{ user.id }}_{{ range(100000, 999999) | random }}</code>
+                    <button class="btn-small" onclick="copyApiKey()">📋 Копіювати</button>
+                </div>
+                <p class="form-text">
+                    Використовуйте цей ключ для інтеграції з іншими системами
+                </p>
+                <button class="btn btn-warning btn-small" onclick="regenerateApiKey()">
+                    🔄 Згенерувати новий
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Збереження налаштувань профілю
+document.getElementById('profileForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch('/settings', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        if (data && data.status === 'success') {
+            alert('✅ Профіль оновлено!');
+        }
+    })
+    .catch(error => {
+        console.error('Помилка:', error);
+        alert('❌ Помилка при збереженні');
+    });
+});
+
+// Збереження налаштувань розміщення
+function saveDeploySettings() {
+    const settings = {
+        github_repo: document.getElementById('github_repo').value,
+        github_branch: document.getElementById('github_branch').value,
+        github_token: document.getElementById('github_token').value,
+        local_path: document.getElementById('local_path').value,
+        pastebin_api: document.getElementById('pastebin_api').value
+    };
+    
+    fetch('/api/save-deploy-settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(settings)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✅ Налаштування розміщення збережено!');
+        } else {
+            alert('❌ Помилка: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Помилка:', error);
+        alert('❌ Помилка при збереженні');
+    });
+}
+
+// Збереження налаштувань сповіщень
+function saveNotificationSettings() {
+    const settings = {
+        telegram_bot: document.getElementById('telegram_bot').value,
+        telegram_chat: document.getElementById('telegram_chat').value,
+        slack_webhook: document.getElementById('slack_webhook').value,
+        alert_email: document.getElementById('alert_email').value
+    };
+    
+    fetch('/api/save-notification-settings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(settings)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✅ Налаштування сповіщень збережено!');
+        } else {
+            alert('❌ Помилка: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Помилка:', error);
+        alert('❌ Помилка при збереженні');
+    });
+}
+
+// Зміна пароля
+function changePassword() {
+    const newPassword = prompt('Введіть новий пароль (мінімум 6 символів):');
+    if (newPassword && newPassword.length >= 6) {
+        fetch('/api/change-password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({password: newPassword})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('✅ Пароль успішно змінено!');
+            } else {
+                alert('❌ ' + data.message);
+            }
+        });
+    } else if (newPassword) {
+        alert('❌ Пароль має містити мінімум 6 символів');
+    }
+}
+
+// Вихід звідусіль
+function logoutAll() {
+    if (confirm('Ви дійсно хочете вийти з усіх пристроїв?')) {
+        fetch('/api/logout-all', {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('✅ Ви вийшли з усіх сесій');
+                window.location.href = '/login';
+            }
+        });
+    }
+}
+
+// Експорт даних
+function exportData() {
+    fetch('/api/export-data')
+    .then(response => response.json())
+    .then(data => {
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `canarytrap_export_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+    });
+}
+
+// Копіювання API ключа
+function copyApiKey() {
+    const apiKey = document.getElementById('apiKey').textContent;
+    navigator.clipboard.writeText(apiKey);
+    alert('📋 API ключ скопійовано в буфер обміну');
+}
+
+// Генерація нового API ключа
+function regenerateApiKey() {
+    if (confirm('Згенерувати новий API ключ? Старий ключ перестане працювати.')) {
+        fetch('/api/regenerate-key', {method: 'POST'})
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                document.getElementById('apiKey').textContent = data.api_key;
+                alert('🔄 Новий API ключ згенеровано');
+            }
+        });
+    }
+}
+</script>
+
+<style>
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 1.5rem;
+}
+
+.settings-form {
+    max-width: 100%;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control[readonly] {
+    background: var(--light);
+    cursor: not-allowed;
+}
+
+.form-text {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+h3 {
+    color: var(--dark);
+    font-size: 1.1rem;
+    margin: 1.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    background: var(--light);
+    border-radius: 0.5rem;
+    align-items: center;
+}
+
+.stat-row span:first-child {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.stat-row strong {
+    color: var(--dark);
+    font-size: 1rem;
+}
+
+.stat-row a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.stat-row a:hover {
+    text-decoration: underline;
+}
+
+.api-key-display {
+    background: var(--dark);
+    color: #fff;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    font-family: monospace;
+    word-break: break-all;
+}
+
+.api-key-display code {
+    color: #10b981;
+    font-size: 0.9rem;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+    border: none;
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+    border: none;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+    border: none;
+}
+
+.btn-warning:hover, .btn-danger:hover, .btn-secondary:hover {
+    opacity: 0.9;
+}
+
+.settings-page .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .settings-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .api-key-display {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .stat-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

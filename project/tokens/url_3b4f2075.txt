@@ -1,0 +1,13 @@
+{
+  "id": "3b4f2075-6507-438d-8b44-18eea9fa4fec",
+  "type": "url",
+  "value": "https://names-demanding-aside-middle.trycloudflare.com/i/54Mt7fJL74KLqpmI",
+  "url_slug": "54Mt7fJL74KLqpmI",
+  "tracker": "3486869f6af7d567",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/i/54Mt7fJL74KLqpmI",
+    "url_slug": "54Mt7fJL74KLqpmI",
+    "created": "2026-04-04T02:33:24.556226"
+  }
+}

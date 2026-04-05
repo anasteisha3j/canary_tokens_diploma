@@ -1,0 +1,11 @@
+{
+  "id": "f3d6d427-2b76-4a35-9a6e-00538939144d",
+  "type": "url",
+  "value": "http://127.0.0.1:5000/api/trigger/f3d6d427-2b76-4a35-9a6e-00538939144d",
+  "tracker": "8faa776f31c27f5d",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/api/trigger/f3d6d427-2b76-4a35-9a6e-00538939144d",
+    "created": "2026-04-04T00:51:56.594951"
+  }
+}

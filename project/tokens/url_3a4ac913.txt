@@ -1,0 +1,11 @@
+{
+  "id": "3a4ac913-a988-4a8e-9701-170f7c830995",
+  "type": "url",
+  "value": "http://127.0.0.1:5000/api/trigger/3a4ac913-a988-4a8e-9701-170f7c830995",
+  "tracker": "f87cd914e6be6739",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/api/trigger/3a4ac913-a988-4a8e-9701-170f7c830995",
+    "created": "2026-04-04T00:51:56.594818"
+  }
+}

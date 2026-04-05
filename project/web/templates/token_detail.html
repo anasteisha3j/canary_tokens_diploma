@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Деталі токена{% endblock %}
+
+{% block content %}
+<div class="token-detail-page">
+    <div class="page-header" style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
+        <h1 class="page-title" style="margin-bottom: 0; flex: 1 1 auto;">🔍 Деталі токена #{{ token.id }}</h1>
+        <a href="{{ url_for('tokens') }}" class="btn">← До списку токенів</a>
+        <form method="post" action="{{ url_for('delete_token', token_id=token.id) }}" style="display: inline; margin: 0;"
+              onsubmit="return confirm('Видалити цей токен назавжди? Записи активацій також зникнуть.');">
+            <button type="submit" class="btn btn-danger">Видалити токен</button>
+        </form>
+    </div>
+
+    <div class="detail-grid">
+        <div class="card">
+            <div class="card-header">
+                <h2>Інформація про токен</h2>
+            </div>
+            <div class="card-content">
+                <table class="detail-table">
+                    <tr>
+                        <th>ID токена:</th>
+                        <td><code>{{ token.token_id }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Тип:</th>
+                        <td>
+                            <span class="token-type-badge token-{{ token.token_type }}">
+                                {{ token.token_type }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Значення:</th>
+                        <td><code>{{ token.token_value }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Трекер:</th>
+                        <td><code>{{ token.tracker }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Статус:</th>
+                        <td>
+                            {% if token.status == 'active' %}
+                            <span class="badge success">✅ Активний</span>
+                            {% elif token.status == 'triggered' %}
+                            <span class="badge warning">⚠️ Активований</span>
+                            {% else %}
+                            <span class="badge">❌ Неактивний</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Створено:</th>
+                        <td>{{ token.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    </tr>
+                    {% if token.triggered_at %}
+                    <tr>
+                        <th>Активовано:</th>
+                        <td>{{ token.triggered_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Власник:</th>
+                        <td>{{ token.owner.username if token.owner else 'Системний' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2>Метадані токена</h2>
+            </div>
+            <div class="card-content">
+                <pre class="metadata-json">{{ token.token_metadata|tojson(indent=2) }}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>📋 Історія активацій ({{ activations|length }})</h2>
+        </div>
+        <div class="card-content">
+            {% if activations %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Час</th>
+                        <th>IP адреса</th>
+                        <th>Країна</th>
+                        <th>Місто</th>
+                        <th>User-Agent</th>
+                        <th>Джерело</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for act in activations %}
+                    <tr>
+                        <td>{{ act.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                        <td><code>{{ act.ip_address }}</code></td>
+                        <td>
+                            {% if act.country %}
+                                {{ act.country }}
+                            {% else %}
+                                Невідомо
+                            {% endif %}
+                        </td>
+                        <td>{{ act.city or 'Невідомо' }}</td>
+                        <td class="user-agent">{{ act.user_agent|truncate(50) }}</td>
+                        <td><span class="source-badge source-{{ act.source }}">{{ act.source }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">Цей токен ще не активовано</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detail-table {
+    width: 100%;
+}
+
+.detail-table th {
+    text-align: left;
+    padding: 0.75rem;
+    background: var(--light);
+    width: 120px;
+}
+
+.detail-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.metadata-json {
+    background: var(--light);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    font-size: 0.9rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.user-agent {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}

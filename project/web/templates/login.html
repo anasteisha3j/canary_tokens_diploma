@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CanaryTrap - Вхід</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🪤 CanaryTrap</h1>
+                <p>Система проактивного виявлення OSINT</p>
+            </div>
+            
+            <form method="POST" class="auth-form">
+                <div class="form-group">
+                    <label for="username">Ім'я користувача</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">Увійти</button>
+            </form>
+            
+            <div class="auth-footer">
+                <p>Немає акаунту? <a href="{{ url_for('register') }}">Зареєструватись</a></p>
+                <p class="test-cred">Тестовий доступ: admin / admin123</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
