@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Активації токенів{% endblock %}
+
+{% block content %}
+<div class="activations-page">
+    <h1 class="page-title">🚨 Історія активацій</h1>
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Всі активації honeypot-токенів</h2>
+            <div class="header-actions">
+                <input type="text" id="searchInput" placeholder="🔍 Пошук по IP або країні..." 
+                       class="search-input" onkeyup="filterTable()">
+            </div>
+        </div>
+        <div class="card-content">
+            {% if activations %}
+            <table class="table" id="activationsTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Тип токена</th>
+                        <th>IP адреса</th>
+                        <th>Країна</th>
+                        <th>Місто</th>
+                        <th>Час</th>
+                        <th>Джерело</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for act in activations %}
+                    <tr>
+                        <td>#{{ act.id }}</td>
+                        <td>
+                            <span class="token-type-badge token-{{ act.token.token_type }}">
+                                {{ act.token.token_type }}
+                            </span>
+                        </td>
+                        <td><code>{{ act.ip_address }}</code></td>
+                        <td>
+                            {% if act.country %}
+                                <span class="country-flag">
+                                    {% if act.country == 'Україна' %}🇺🇦
+                                    {% elif act.country == 'росія' %}🇷🇺
+                                    {% elif act.country == 'США' %}🇺🇸
+                                    {% elif act.country == 'Китай' %}🇨🇳
+                                    {% else %}🌍
+                                    {% endif %}
+                                </span>
+                                {{ act.country }}
+                            {% else %}
+                                Невідомо
+                            {% endif %}
+                        </td>
+                        <td>{{ act.city or 'Невідомо' }}</td>
+                        <td>{{ act.timestamp.strftime('%d.%m.%Y %H:%M') }}</td>
+                        <td>
+                            <span class="source-badge source-{{ act.source }}">
+                                {{ act.source }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('token_detail', token_id=act.token.id) }}" 
+                               class="btn-small">🔍 Деталі токена</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>Ще немає активацій</h3>
+                <p>Коли хтось активує honeypot-токен, він з'явиться тут.</p>
+                <a href="{{ url_for('tokens') }}" class="btn">➕ Створити токени</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if activations %}
+    <div class="stats-cards">
+        <div class="stat-card small">
+            <div class="stat-icon">📊</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ activations|length }}</div>
+                <div class="stat-label">Всього активацій</div>
+            </div>
+        </div>
+        
+        <div class="stat-card small">
+            <div class="stat-icon">🌍</div>
+            <div class="stat-content">
+                {% set countries = activations|map(attribute='country')|unique|list %}
+                <div class="stat-value">{{ countries|length }}</div>
+                <div class="stat-label">Країн</div>
+            </div>
+        </div>
+        
+        <div class="stat-card small">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-content">
+                {% set types = activations|map(attribute='token.token_type')|unique|list %}
+                <div class="stat-value">{{ types|length }}</div>
+                <div class="stat-label">Типів токенів</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function filterTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toLowerCase();
+    const table = document.getElementById('activationsTable');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
+        const cells = row.getElementsByTagName('td');
+        let found = false;
+        
+        for (let j = 0; j < cells.length; j++) {
+            const cell = cells[j];
+            if (cell) {
+                const text = cell.textContent || cell.innerText;
+                if (text.toLowerCase().indexOf(filter) > -1) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        
+        row.style.display = found ? '' : 'none';
+    }
+}
+
+// Автоматичне оновлення кожні 30 секунд
+setTimeout(function() {
+    location.reload();
+}, 30000);
+</script>
+
+<style>
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card.small {
+    padding: 1rem;
+}
+
+.search-input {
+    padding: 0.5rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 2rem;
+    font-size: 0.9rem;
+    width: 250px;
+    transition: all 0.2s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.token-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.token-aws_key { background: #ff9900; color: white; }
+.token-github_token { background: #24292e; color: white; }
+.token-url { background: #2563eb; color: white; }
+.token-document { background: #10b981; color: white; }
+.token-dns { background: #8b5cf6; color: white; }
+
+.source-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    background: var(--light);
+}
+
+.source-github { background: #24292e; color: white; }
+.source-web { background: #2563eb; color: white; }
+.source-dns { background: #8b5cf6; color: white; }
+.source-manual { background: #f59e0b; color: white; }
+
+.country-flag {
+    margin-right: 0.3rem;
+    font-size: 1.1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+@media (max-width: 768px) {
+    .search-input {
+        width: 100%;
+    }
+    
+    .header-actions {
+        width: 100%;
+        margin-top: 1rem;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+</style>
+{% endblock %}

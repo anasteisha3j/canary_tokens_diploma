@@ -1,0 +1,11 @@
+{
+  "id": "012cdb55-fa09-43e6-8c0c-8f56d14b3f00",
+  "type": "aws_key",
+  "value": "AKIAMUOH7A3NOQ9KOC2E",
+  "tracker": "b157623e82d9a8b5",
+  "metadata": {
+    "service": "AWS",
+    "format": "AKIA...",
+    "created": "2026-04-24T16:25:33.149620"
+  }
+}

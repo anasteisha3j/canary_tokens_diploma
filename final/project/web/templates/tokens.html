@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Токени{% endblock %}
+
+{% block content %}
+<div class="tokens-page">
+    <div class="page-header">
+        <h1 class="page-title">🎯 Управління токенами</h1>
+        <button onclick="showGenerateForm()" class="btn btn-primary">➕ Створити токени</button>
+    </div>
+
+    <div id="generateForm" class="card" style="display: none; margin-bottom: 2rem;">
+        <div class="card-header">
+            <h2>Створення нових токенів</h2>
+        </div>
+        <div class="card-content">
+            <form id="tokenForm" onsubmit="generateTokens(event)">
+                <div class="form-group">
+                    <label for="token_type">Тип токена:</label>
+                    <select name="token_type" id="token_type" class="form-control">
+                        <option value="aws_key">AWS ключі</option>
+                        <option value="github_token">GitHub токени</option>
+                        <option value="url">URL-токени</option>
+                        <option value="document">Документи</option>
+                        <option value="mixed">Змішані</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="count">Кількість:</label>
+                    <input type="number" name="count" id="count" min="1" max="50" value="5" class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label>Платформи для розміщення:</label>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" name="platforms" value="github" checked> GitHub
+                        </label>
+                        <label>
+                            <input type="checkbox" name="platforms" value="local" checked> Локальна папка
+                        </label>
+                        <label>
+                            <input type="checkbox" name="platforms" value="pastebin"> Pastebin
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success">Генерувати та розмістити</button>
+                <button type="button" onclick="hideGenerateForm()" class="btn">Скасувати</button>
+            </form>
+            <div id="generationStatus" style="margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <!-- Ручне розміщення -->
+    <div class="card">
+        <div class="card-header">
+            <h2>📤 Ручне розміщення токенів</h2>
+        </div>
+        <div class="card-content">
+            <button onclick="deployToGithub()" class="btn">Розмістити на GitHub</button>
+            <button onclick="deployToLocal()" class="btn">Розмістити локально</button>
+            <button onclick="deployToPastebin()" class="btn">Розмістити на Pastebin</button>
+            <div id="deployStatus" style="margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <!-- Список токенів -->
+    <div class="card">
+        <div class="card-header tokens-list-header">
+            <h2>Існуючі токени</h2>
+            <div class="tokens-toolbar">
+                <label class="filter-label" for="statusFilter">Фільтр:</label>
+                <select id="statusFilter" class="form-control filter-select"
+                        onchange="window.location.href='{{ url_for('tokens') }}' + (this.value ? '?status=' + encodeURIComponent(this.value) : '')">
+                    <option value="" {% if not status_filter %}selected{% endif %}>Усі</option>
+                    <option value="active"    {% if status_filter == 'active'    %}selected{% endif %}>Ще не активовані</option>
+                    <option value="triggered" {% if status_filter == 'triggered' %}selected{% endif %}>Активовані</option>
+                </select>
+                {% if tokens %}
+                <form method="post" action="{{ url_for('delete_all_tokens') }}"
+                      class="bulk-delete-form" onsubmit="return confirmBulkDelete(this);">
+                    <input type="hidden" name="filter_status" value="{{ status_filter or '' }}">
+                    <label class="filter-label" for="bulkScope">Видалення токенів:</label>
+                    <select name="scope" id="bulkScope" class="form-control filter-select">
+                        <option value="all">Усі токени організації</option>
+                        <option value="active">Усі ще не активовані</option>
+                        <option value="triggered">Усі активовані</option>
+                    </select>
+                    <button type="submit" class="btn btn-small btn-danger">Видалити</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card-content">
+            {% if tokens %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Тип</th>
+                        <th>Значення</th>
+                        <th>Статус</th>
+                        <th>Створено</th>
+                        <th>Дії</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for token in tokens %}
+                    <tr data-token-status="{{ token.status }}">
+                        <td>{{ token.id }}</td>
+                        <td>
+                            <span class="token-type-badge token-{{ token.token_type }}">
+                                {{ token.token_type }}
+                            </span>
+                        </td>
+                        <td class="token-value">
+                            {# document tokens store a file path — show filename only #}
+                            {% if token.token_type == 'document' %}
+                                📄 {{ token.token_metadata.filename if token.token_metadata and token.token_metadata.filename else token.token_id }}
+                            {% elif token.token_value | length > 40 %}
+                                {{ token.token_value[:40] }}…
+                            {% else %}
+                                {{ token.token_value }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if token.status == 'active' %}
+                                <span class="badge success">Активний</span>
+                            {% elif token.status == 'triggered' %}
+                                <span class="badge warning">Активований</span>
+                            {% else %}
+                                <span class="badge">Неактивний</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ token.created_at.strftime('%d.%m.%Y') }}</td>
+                        <td class="token-actions">
+                            <a href="{{ url_for('token_detail', token_id=token.id) }}" class="btn-small">Деталі</a>
+
+                            {# Download button — only for document tokens #}
+                            {% if token.token_type == 'document' %}
+                            <a href="{{ url_for('download_token', token_id=token.id) }}"
+                             class="btn-small btn-success">⬇ PDF</a>
+                            <button class="btn-small"
+                                    onclick="pushToGithub({{ token.id }}, this)"> GitHub</button>
+                            {% endif %}
+
+                            <form method="post" action="{{ url_for('delete_token', token_id=token.id) }}"
+                                  class="inline-delete-form"
+                                  onsubmit="return confirm('Видалити токен #{{ token.id }}?');">
+                                <input type="hidden" name="filter_status" value="{{ status_filter or '' }}">
+                                <button type="submit" class="btn-small btn-danger">Видалити</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">
+                {% if status_filter %}Немає токенів за цим фільтром.{% else %}Ще немає токенів. Створіть перші приманки!{% endif %}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function showGenerateForm() {
+    document.getElementById('generateForm').style.display = 'block';
+}
+
+function hideGenerateForm() {
+    document.getElementById('generateForm').style.display = 'none';
+}
+
+async function generateTokens(event) {
+    event.preventDefault();
+    const form = document.getElementById('tokenForm');
+    const statusDiv = document.getElementById('generationStatus');
+    statusDiv.innerHTML = '🔄 Генерація токенів...';
+    try {
+        const response = await fetch('/tokens/generate', {
+            method: 'POST',
+            body: new FormData(form)
+        });
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            statusDiv.innerHTML = '❌ Помилка: ' + await response.text();
+        }
+    } catch (error) {
+        statusDiv.innerHTML = '❌ Помилка: ' + error;
+    }
+}
+
+function confirmBulkDelete(form) {
+    const labels = {
+        all:  'УСІ токени вашої організації',
+        active: 'усі ще не активовані токени',
+        triggered: 'усі активовані токени'
+    };
+    return confirm('Видалити ' + (labels[form.scope.value] || labels.all) + '? Цю дію не скасувати.');
+}
+
+async function deployToGithub() {
+    const s = document.getElementById('deployStatus');
+    s.innerHTML = '🔄 Розміщення на GitHub...';
+    try {
+        const r = await fetch('/api/deploy/github', { method: 'POST' });
+        s.innerHTML = '✅ ' + (await r.json()).message;
+    } catch (e) { s.innerHTML = '❌ ' + e; }
+}
+
+async function deployToLocal() {
+    const s = document.getElementById('deployStatus');
+    s.innerHTML = '🔄 Розміщення локально...';
+    try {
+        const r = await fetch('/api/deploy/local', { method: 'POST' });
+        s.innerHTML = '✅ ' + (await r.json()).message;
+    } catch (e) { s.innerHTML = '❌ ' + e; }
+}
+
+async function deployToPastebin() {
+    const s = document.getElementById('deployStatus');
+    s.innerHTML = '🔄 Розміщення на Pastebin...';
+    try {
+        const r = await fetch('/api/deploy/pastebin', { method: 'POST' });
+        s.innerHTML = '✅ ' + (await r.json()).message;
+    } catch (e) { s.innerHTML = '❌ ' + e; }
+}
+
+async function pushToGithub(tokenId, btn) {
+    const orig = btn.textContent;
+    btn.textContent = '⏳';
+    btn.disabled = true;
+    try {
+        const r = await fetch(`/tokens/${tokenId}/deploy-github`, { method: 'POST' });
+        const d = await r.json();
+        btn.textContent = d.status === 'success' ? '✅' : '❌';
+        btn.title = d.status === 'success' ? (d.url || d.path) : d.message;
+    } catch (e) {
+        btn.textContent = '❌';
+        btn.title = String(e);
+    }
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.title = ''; }, 3000);
+}
+</script>
+
+<style>
+.checkbox-group {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem;
+    background: var(--light);
+    border-radius: 0.5rem;
+}
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+.token-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.token-aws_key     { background: #ff9900; color: white; }
+.token-github_token{ background: #24292e; color: white; }
+.token-url         { background: #2563eb; color: white; }
+.token-document    { background: #10b981; color: white; }
+
+.tokens-list-header { flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+.tokens-list-header h2 { margin-right: auto; }
+.tokens-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+}
+.filter-label   { font-size: 0.9rem; color: var(--text, #374151); white-space: nowrap; }
+.filter-select  { min-width: 11rem; max-width: 100%; }
+.bulk-delete-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 0.5rem;
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--border, #e5e7eb);
+}
+.token-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+}
+.inline-delete-form { display: inline; margin: 0; }
+.btn-success { background: #10b981; color: white; border: none; }
+.btn-success:hover { opacity: 0.9; }
+</style>
+{% endblock %}

@@ -1,0 +1,13 @@
+{
+  "id": "e6862db3-3329-4634-bfdb-7c3bb9b4f58a",
+  "type": "url",
+  "value": "https://names-demanding-aside-middle.trycloudflare.com/i/wtkVbczGGhvsm54Z",
+  "url_slug": "wtkVbczGGhvsm54Z",
+  "tracker": "37c8a8908976aeda",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/i/wtkVbczGGhvsm54Z",
+    "url_slug": "wtkVbczGGhvsm54Z",
+    "created": "2026-04-04T02:29:35.657130"
+  }
+}

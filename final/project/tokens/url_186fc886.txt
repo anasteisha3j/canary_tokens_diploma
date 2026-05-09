@@ -1,0 +1,11 @@
+{
+  "id": "186fc886-f016-464a-a6a8-d8cea813f063",
+  "type": "url",
+  "value": "http://192.168.1.104:5000/api/trigger/186fc886-f016-464a-a6a8-d8cea813f063",
+  "tracker": "b74e6cc9db917557",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/api/trigger/186fc886-f016-464a-a6a8-d8cea813f063",
+    "created": "2026-04-04T01:27:58.484710"
+  }
+}

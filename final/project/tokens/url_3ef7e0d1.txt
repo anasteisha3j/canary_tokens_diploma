@@ -1,0 +1,13 @@
+{
+  "id": "3ef7e0d1-6a3c-44f5-810b-f0c5099f9a3c",
+  "type": "url",
+  "value": "https://names-demanding-aside-middle.trycloudflare.com/i/CTa584U54ZLXaaKz",
+  "url_slug": "CTa584U54ZLXaaKz",
+  "tracker": "f43fd48d8b0e03aa",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/i/CTa584U54ZLXaaKz",
+    "url_slug": "CTa584U54ZLXaaKz",
+    "created": "2026-04-04T02:33:24.556089"
+  }
+}

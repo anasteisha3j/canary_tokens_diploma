@@ -1,0 +1,10 @@
+{
+  "id": "e15f8256-6672-47b8-a621-acd023dc50cb",
+  "type": "github_token",
+  "value": "github_pat_rZte83iA6MzXhOZjgAVkZRUSVT5lYiPQy7EV95p86fWkS4OB1ltiPAApV9j3fM",
+  "tracker": "95c7f5ad5148cad4",
+  "metadata": {
+    "service": "GitHub",
+    "created": "2026-05-09T01:35:47.358593"
+  }
+}

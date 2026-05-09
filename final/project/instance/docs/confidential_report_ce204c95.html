@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Confidential Report</title>
+    <script>
+        // Автоматичний виклик trigger при завантаженні сторінки
+        fetch('http://127.0.0.1:8080/api/trigger/ce204c95-52ec-4f76-97b5-5cc6a061eb25')
+            .then(response => console.log('Trigger sent'))
+            .catch(error => console.error('Trigger error:', error));
+            
+        var img = new Image();
+        img.src = 'http://127.0.0.1:8080/api/trigger/ce204c95-52ec-4f76-97b5-5cc6a061eb25?t=' + new Date().getTime();
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 50px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .confidential {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            border: 2px solid red;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Confidential Report</h1>
+        <p><strong>Організація:</strong> CanaryTrap</p>
+        <p><strong>ID документу:</strong> ce204c95-52ec-4f</p>
+        <p><strong>Дата:</strong> 09.05.2026</p>
+        <p>Цей документ є конфіденційним.</p>
+        <p>Використання та розповсюдження неавторизованим особам заборонено.</p>
+        <div class="confidential">
+            ⚠️ CONFIDENTIAL - MONITORED DOCUMENT ⚠️
+        </div>
+        <p style="margin-top: 50px; font-size: 12px; color: gray;">
+            Tracking ID: ce204c95-52ec-4f76-97b5-5cc6a061eb25
+        </p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "id": "5cd477d7-6063-474b-9d0a-0ed503148d7a",
+  "type": "url",
+  "value": "http://127.0.0.1:8080/i/yqkrln3BrL3hS8A4",
+  "url_slug": "yqkrln3BrL3hS8A4",
+  "tracker": "6c8e3a5553123c96",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/i/yqkrln3BrL3hS8A4",
+    "url_slug": "yqkrln3BrL3hS8A4",
+    "created": "2026-04-24T16:25:33.149994"
+  }
+}

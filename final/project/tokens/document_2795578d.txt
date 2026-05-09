@@ -1,0 +1,13 @@
+{
+  "id": "2795578d-1e6d-45de-bb7f-3ab6c167f3f4",
+  "type": "document",
+  "value": "Employee_Salaries_20260508.xlsx",
+  "tracker": "20e32e5ea0535b44",
+  "metadata": {
+    "filename": "Employee_Salaries_20260508.xlsx",
+    "doc_type": "xlsx",
+    "topic": "Employee_Salaries",
+    "created": "2026-05-08T20:48:17.842590"
+  },
+  "url_slug": "RWK1OWBWeiuAVGfd"
+}

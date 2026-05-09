@@ -1,0 +1,13 @@
+{
+  "id": "e4cc5eb5-d4ef-4ed1-9ee5-f03eb6d89fec",
+  "type": "document",
+  "value": "Network_Diagram_20260508.docx",
+  "tracker": "26d999130b69448b",
+  "metadata": {
+    "filename": "Network_Diagram_20260508.docx",
+    "doc_type": "docx",
+    "topic": "Network_Diagram",
+    "created": "2026-05-08T20:48:17.842630"
+  },
+  "url_slug": "LREiODFwPI4BI0l1"
+}

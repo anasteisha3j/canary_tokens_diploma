@@ -1,0 +1,11 @@
+{
+  "id": "157d20c4-9284-472a-98ab-ccc12030f634",
+  "type": "url",
+  "value": "http://169.254.233.104:5000/api/trigger/157d20c4-9284-472a-98ab-ccc12030f634",
+  "tracker": "365445e727f00661",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/api/trigger/157d20c4-9284-472a-98ab-ccc12030f634",
+    "created": "2026-04-04T01:32:55.782682"
+  }
+}

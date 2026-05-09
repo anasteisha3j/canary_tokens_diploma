@@ -1,0 +1,13 @@
+{
+  "id": "e842a8c3-eaf9-4c20-9c12-5de6d3159c9d",
+  "type": "url",
+  "value": "http://127.0.0.1:8080/i/23Zd3f8ECEyD9sCs",
+  "url_slug": "23Zd3f8ECEyD9sCs",
+  "tracker": "3b3121e04428742c",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/i/23Zd3f8ECEyD9sCs",
+    "url_slug": "23Zd3f8ECEyD9sCs",
+    "created": "2026-05-09T01:35:47.358651"
+  }
+}

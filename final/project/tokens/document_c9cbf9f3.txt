@@ -1,0 +1,13 @@
+{
+  "id": "c9cbf9f3-0455-4199-875c-beb020277e1c",
+  "type": "document",
+  "value": "Employee_Salaries_20260508.pptx",
+  "tracker": "707c0cdb5b67d02c",
+  "metadata": {
+    "filename": "Employee_Salaries_20260508.pptx",
+    "doc_type": "pptx",
+    "topic": "Employee_Salaries",
+    "created": "2026-05-08T20:51:52.356882"
+  },
+  "url_slug": "UrSnx0S3AyH4sPdb"
+}
