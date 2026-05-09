@@ -1,0 +1,12 @@
+{
+  "id": "3ed4c68d-9d67-42e8-83e5-48f187e949c8",
+  "type": "document",
+  "value": "Employee_Salaries_20260424.pptx",
+  "tracker": "cc86d28ae0354209",
+  "metadata": {
+    "filename": "Employee_Salaries_20260424.pptx",
+    "doc_type": "pptx",
+    "topic": "Employee_Salaries",
+    "created": "2026-04-24T16:25:33.150099"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "e066532e-ab6d-4838-bec5-161dac9b41ef",
+  "type": "document",
+  "value": "Network_Diagram_20260509.pdf",
+  "tracker": "be34f62557ff76fb",
+  "metadata": {
+    "filename": "Network_Diagram_20260509.pdf",
+    "doc_type": "pdf",
+    "topic": "Network_Diagram",
+    "created": "2026-05-09T01:35:47.358703"
+  }
+}

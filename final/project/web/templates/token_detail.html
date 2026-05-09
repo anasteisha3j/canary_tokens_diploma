@@ -1,0 +1,260 @@
+{% extends "base.html" %}
+
+{% block title %}Деталі токена{% endblock %}
+
+{% block content %}
+<div class="token-detail-page">
+
+    <div class="page-header">
+        <h1 class="page-title">🔍 Деталі токена #{{ token.id }}</h1>
+        <div class="header-actions">
+            <a href="{{ url_for('tokens') }}" class="btn">← До списку</a>
+
+            {% if token.token_type == 'document' %}
+            <a href="{{ url_for('download_token', token_id=token.id) }}" class="btn btn-success">
+                ⬇ Завантажити PDF
+            </a>
+
+            <button class="btn" id="ghBtn" onclick="pushToGithub({{ token.id }})">
+                Push to GitHub
+            </button>
+            <span id="ghStatus" style="font-size:0.9rem;"></span>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('delete_token', token_id=token.id) }}"
+                  style="display:inline; margin:0;"
+                  onsubmit="return confirm('Видалити цей токен назавжди? Записи активацій також зникнуть.');">
+                <button type="submit" class="btn btn-danger">🗑 Видалити</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <!-- Token info -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Інформація про токен</h2>
+            </div>
+            <div class="card-content">
+                <table class="detail-table">
+                    <tr>
+                        <th>ID токена:</th>
+                        <td><code>{{ token.token_id }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Тип:</th>
+                        <td>
+                            <span class="token-type-badge token-{{ token.token_type }}">
+                                {{ token.token_type }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Значення:</th>
+                        <td>
+                            {% if token.token_type == 'document' %}
+                                {% if token.token_metadata %}
+                                    {% set meta = token.token_metadata|tojson|safe %}
+                                    {# Extract filename from JSON string #}
+                                    <code>📄 {{ token.token_metadata.filename if token.token_metadata.filename else token.token_id + '.pdf' }}</code>
+                                {% else %}
+                                    <code>📄 {{ token.token_id + '.pdf' }}</code>
+                                {% endif %}
+                            {% else %}
+                                <code>{{ token.token_value }}</code>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Трекер:</th>
+                        <td><code>{{ token.tracker }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Статус:</th>
+                        <td>
+                            {% if token.status == 'active' %}
+                                <span class="badge success">✅ Активний</span>
+                            {% elif token.status == 'triggered' %}
+                                <span class="badge warning">⚠️ Активований</span>
+                            {% else %}
+                                <span class="badge">❌ Неактивний</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Створено:</th>
+                        <td>{{ token.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    </tr>
+                    {% if token.triggered_at %}
+                    <tr>
+                        <th>Активовано:</th>
+                        <td>{{ token.triggered_at.strftime('%d.%m.%Y %H:%M') }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Власник:</th>
+                        <td>{{ token.owner.username if token.owner else 'Системний' }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="card">
+            <div class="card-header">
+                <h2>Метадані токена</h2>
+            </div>
+            <div class="card-content">
+                {% if token.token_type == 'document' and token.token_metadata %}
+                <table class="detail-table">
+                    {% if token.token_metadata.filename %}<tr><th>Файл:</th><td>{{ token.token_metadata.filename }}</td></tr>{% endif %}
+                    {% if token.token_metadata.size_bytes %}<tr><th>Розмір:</th><td>{{ (token.token_metadata.size_bytes / 1024) | round(1) }} KB</td></tr>{% endif %}
+                    {% if token.token_metadata.trigger_url %}<tr><th>Trigger URL:</th><td><code style="font-size:0.8rem;word-break:break-all;">{{ token.token_metadata.trigger_url }}</code></td></tr>{% endif %}
+                    {% if token.token_metadata.created %}<tr><th>Створено:</th><td>{{ token.token_metadata.created }}</td></tr>{% endif %}
+                </table>
+                {% else %}
+                <pre class="metadata-json">{{ token.token_metadata|tojson(indent=2) if token.token_metadata else '{}' }}</pre>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Activations -->
+    <div class="card">
+        <div class="card-header">
+            <h2>📋 Історія активацій ({{ activations | length }})</h2>
+        </div>
+        <div class="card-content">
+            {% if activations %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Час</th>
+                        <th>IP адреса</th>
+                        <th>Країна</th>
+                        <th>Місто</th>
+                        <th>User-Agent</th>
+                        <th>Джерело</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for act in activations %}
+                    <tr>
+                        <td>{{ act.timestamp.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+                        <td><code>{{ act.ip_address }}</code></td>
+                        <td>{{ act.country or 'Невідомо' }}</td>
+                        <td>{{ act.city    or 'Невідомо' }}</td>
+                        <td class="user-agent">{{ act.user_agent | truncate(50) }}</td>
+                        <td><span class="source-badge source-{{ act.source }}">{{ act.source }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-muted">Цей токен ще не активовано</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% if token.token_type == 'document' %}
+<script>
+async function pushToGithub(tokenId) {
+    const btn = document.getElementById('ghBtn');
+    const status = document.getElementById('ghStatus');
+    btn.disabled = true;
+    btn.textContent = '⏳ Завантаження...';
+    status.textContent = '';
+    try {
+        const r = await fetch(`/tokens/${tokenId}/deploy-github`, { method: 'POST' });
+        const d = await r.json();
+        if (d.status === 'success') {
+            btn.textContent = '✅ Завантажено';
+            status.innerHTML = d.url
+                ? `<a href="${d.url}" target="_blank" style="font-size:0.85rem;">${d.url}</a>`
+                : d.path;
+        } else {
+            btn.textContent = 'Push to GitHub';
+            btn.disabled = false;
+            status.textContent = '❌ ' + d.message;
+        }
+    } catch (e) {
+        btn.textContent = '🐙 Push to GitHub';
+        btn.disabled = false;
+        status.textContent = '❌ ' + e;
+    }
+}
+</script>
+{% endif %}
+
+<style>
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+.page-title { flex: 1 1 auto; margin-bottom: 0; }
+.header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.detail-table { width: 100%; }
+.detail-table th {
+    text-align: left;
+    padding: 0.75rem;
+    background: var(--light);
+    width: 130px;
+    vertical-align: top;
+    white-space: nowrap;
+}
+.detail-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    word-break: break-word;
+}
+.metadata-json {
+    background: var(--light);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    font-size: 0.9rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+.user-agent {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: #666;
+}
+.token-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.token-aws_key      { background: #ff9900; color: white; }
+.token-github_token { background: #24292e; color: white; }
+.token-url          { background: #2563eb; color: white; }
+.token-document     { background: #10b981; color: white; }
+.btn-success { background: #10b981; color: white; border: none; }
+.btn-success:hover { opacity: 0.9; }
+
+@media (max-width: 768px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+{% endblock %}

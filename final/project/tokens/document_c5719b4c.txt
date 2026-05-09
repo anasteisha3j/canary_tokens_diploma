@@ -1,0 +1,12 @@
+{
+  "id": "c5719b4c-1a0a-4859-8803-d4da369fd0b0",
+  "type": "document",
+  "value": "Employee_Salaries_20260426.xlsx",
+  "tracker": "9dbeca1f28acc9da",
+  "metadata": {
+    "filename": "Employee_Salaries_20260426.xlsx",
+    "doc_type": "xlsx",
+    "topic": "Employee_Salaries",
+    "created": "2026-04-26T00:17:59.333667"
+  }
+}

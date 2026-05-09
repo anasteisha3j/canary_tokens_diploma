@@ -1,0 +1,11 @@
+{
+  "id": "ebf9c265-3e50-41f3-a442-ec94fd914068",
+  "type": "url",
+  "value": "http://169.254.233.104:5000/api/trigger/ebf9c265-3e50-41f3-a442-ec94fd914068",
+  "tracker": "dd67ecb79f075c7f",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/api/trigger/ebf9c265-3e50-41f3-a442-ec94fd914068",
+    "created": "2026-04-04T01:32:55.782651"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "id": "54191423-6e79-4bda-800b-1252366f0edd",
+  "type": "document",
+  "value": "Financial_Report_Q4_20260508.docx",
+  "tracker": "9d8c10f515ef1153",
+  "metadata": {
+    "filename": "Financial_Report_Q4_20260508.docx",
+    "doc_type": "docx",
+    "topic": "Financial_Report_Q4",
+    "created": "2026-05-08T20:51:52.356851"
+  },
+  "url_slug": "BtMGPY0KSGYQQVg9"
+}

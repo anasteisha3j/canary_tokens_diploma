@@ -1,0 +1,12 @@
+{
+  "id": "2cd15207-539d-4636-88b5-05001df79237",
+  "type": "document",
+  "value": "Employee_Salaries_20260509.pdf",
+  "tracker": "9228e582d64c55df",
+  "metadata": {
+    "filename": "Employee_Salaries_20260509.pdf",
+    "doc_type": "pdf",
+    "topic": "Employee_Salaries",
+    "created": "2026-05-09T01:35:47.358686"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "1cb4b33b-1fb4-44e1-bc5f-11f754cc9d4e",
+  "type": "url",
+  "value": "http://192.168.1.104:5000/api/trigger/1cb4b33b-1fb4-44e1-bc5f-11f754cc9d4e",
+  "tracker": "59926380bff9e82e",
+  "metadata": {
+    "kind": "canary_http",
+    "trigger_path": "/api/trigger/1cb4b33b-1fb4-44e1-bc5f-11f754cc9d4e",
+    "created": "2026-04-04T01:27:58.484749"
+  }
+}

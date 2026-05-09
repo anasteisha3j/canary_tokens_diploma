@@ -1,0 +1,13 @@
+{
+  "id": "1372508d-aa24-4071-b876-dd5176b54956",
+  "type": "document",
+  "value": "Employee_Salaries_20260508.pdf",
+  "tracker": "5cb3898234522bf5",
+  "metadata": {
+    "filename": "Employee_Salaries_20260508.pdf",
+    "doc_type": "pdf",
+    "topic": "Employee_Salaries",
+    "created": "2026-05-08T20:42:58.730809"
+  },
+  "url_slug": "FnvhtwJxiBujnIZO"
+}
